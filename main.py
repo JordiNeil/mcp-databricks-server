@@ -5,6 +5,9 @@ from databricks.sql import connect
 from databricks.sql.client import Connection
 from mcp.server.fastmcp import FastMCP
 import requests
+import json
+import urllib.parse
+import subprocess
 
 # Load environment variables
 load_dotenv()
