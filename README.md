@@ -66,6 +66,42 @@ You can test the MCP server using the inspector by running
 npx @modelcontextprotocol/inspector python3 main.py
 ```
 
+## Configuring with Docker (for MCP Clients like Cursor)
+
+If you are integrating this server with an MCP client (like Cursor), you might configure it using Docker. The client will typically manage running the Docker container based on a configuration file (e.g., `mcp.json`).
+
+The configuration passes environment variables directly to the Docker container. Here's an example structure, replacing placeholders with your actual credentials:
+
+```json
+{
+  "mcpServers": {
+    "databricks-docker": {
+      "command": "docker",
+      "args": [
+        "run", 
+        "--rm", 
+        "-i", 
+        "-e",
+        "DATABRICKS_HOST=<your-databricks-host>",
+        "-e",
+        "DATABRICKS_TOKEN=<your-databricks-token>",
+        "-e",
+        "DATABRICKS_HTTP_PATH=<your-databricks-http-path>",
+        "<your-docker-image-name>" 
+      ]
+    }
+    // ... other servers ...
+  }
+}
+```
+
+- Replace `<your-databricks-host>` with your Databricks host (e.g., `dbc-xyz.cloud.databricks.com`).
+- Replace `<your-databricks-token>` with your personal access token.
+- Replace `<your-databricks-http-path>` with the HTTP path for your SQL warehouse.
+- Replace `<your-docker-image-name>` with the name of the Docker image built from the `Dockerfile` (e.g., `jordineil/databricks-mcp`).
+
+This method avoids storing secrets directly in a `.env` file within the project, as the MCP client injects them at runtime.
+
 ## Available MCP Tools
 
 The following MCP tools are available:
