@@ -5,6 +5,7 @@ from databricks.sql import connect
 from databricks.sql.client import Connection
 from mcp.server.fastmcp import FastMCP
 import requests
+import logging
 
 # Load environment variables
 load_dotenv()
@@ -17,18 +18,42 @@ DATABRICKS_HTTP_PATH = os.getenv("DATABRICKS_HTTP_PATH")
 # Set up the MCP server
 mcp = FastMCP("Databricks API Explorer")
 
+# Global variable to hold the Databricks SQL connection
+_db_connection: Connection | None = None
 
-# Helper function to get a Databricks SQL connection
+# Helper function to get a reusable Databricks SQL connection
 def get_databricks_connection() -> Connection:
-    """Create and return a Databricks SQL connection"""
+    """Create and return a reusable Databricks SQL connection."""
+    global _db_connection
+    
+    # Check if connection exists and is open
+    if _db_connection is not None:
+        try:
+            # A simple way to check if the connection is still valid
+            # This might depend on the driver's implementation; adjust if needed
+            cursor = _db_connection.cursor()
+            cursor.execute("SELECT 1")
+            cursor.close()
+            logging.info("Reusing existing Databricks SQL connection.")
+            return _db_connection
+        except Exception as e:
+            logging.warning(f"Existing connection seems invalid ({e}), creating a new one.")
+            try:
+                _db_connection.close()
+            except Exception:
+                pass # Ignore errors during close if connection was already broken
+            _db_connection = None # Ensure we create a new one
+
     if not all([DATABRICKS_HOST, DATABRICKS_TOKEN, DATABRICKS_HTTP_PATH]):
         raise ValueError("Missing required Databricks connection details in .env file")
 
-    return connect(
+    logging.info("Creating new Databricks SQL connection.")
+    _db_connection = connect(
         server_hostname=DATABRICKS_HOST,
         http_path=DATABRICKS_HTTP_PATH,
         access_token=DATABRICKS_TOKEN
     )
+    return _db_connection
 
 # Helper function for Databricks REST API requests
 def databricks_api_request(endpoint: str, method: str = "GET", data: Dict = None) -> Dict:
@@ -56,8 +81,8 @@ def databricks_api_request(endpoint: str, method: str = "GET", data: Dict = None
 @mcp.resource("schema://tables")
 def get_schema() -> str:
     """Provide the list of tables in the Databricks SQL warehouse as a resource"""
-    conn = get_databricks_connection()
     try:
+        conn = get_databricks_connection() # Use the shared connection
         cursor = conn.cursor()
         tables = cursor.tables().fetchall()
         
@@ -65,19 +90,17 @@ def get_schema() -> str:
         for table in tables:
             table_info.append(f"Database: {table.TABLE_CAT}, Schema: {table.TABLE_SCHEM}, Table: {table.TABLE_NAME}")
         
+        # Close cursor but not the connection
+        cursor.close()
         return "\n".join(table_info)
     except Exception as e:
         return f"Error retrieving tables: {str(e)}"
-    finally:
-        if 'conn' in locals():
-            conn.close()
 
 @mcp.tool()
 def run_sql_query(sql: str) -> str:
     """Execute SQL queries on Databricks SQL warehouse"""
-    conn = get_databricks_connection()
-
     try:
+        conn = get_databricks_connection() # Use the shared connection
         cursor = conn.cursor()
         result = cursor.execute(sql)
         
@@ -87,6 +110,10 @@ def run_sql_query(sql: str) -> str:
             
             # Format the result as a table
             rows = result.fetchall()
+            
+            # Close cursor but not the connection
+            cursor.close()
+            
             if not rows:
                 return "Query executed successfully. No results returned."
             
@@ -99,12 +126,11 @@ def run_sql_query(sql: str) -> str:
                 
             return table
         else:
+            # Close cursor but not the connection
+            cursor.close()
             return "Query executed successfully. No results returned."
     except Exception as e:
         return f"Error executing query: {str(e)}"
-    finally:
-        if 'conn' in locals():
-            conn.close()
 
 @mcp.tool()
 def list_jobs() -> str:
