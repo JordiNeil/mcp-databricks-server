@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/jordineil-mcp-databricks-server-badge.png)](https://mseep.ai/app/jordineil-mcp-databricks-server)
+
 # Databricks MCP Server
 
 A Model Context Protocol (MCP) server that connects to Databricks API, allowing LLMs to run SQL queries, list jobs, and get job status.
