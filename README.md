@@ -55,6 +55,8 @@ A Model Context Protocol (MCP) server that connects to Databricks API, allowing 
 
 ## Running the Server
 
+### Manually
+
 Start the MCP server:
 ```
 python main.py
@@ -64,6 +66,23 @@ You can test the MCP server using the inspector by running
 
 ```
 npx @modelcontextprotocol/inspector python3 main.py
+```
+
+### In Visual Studio Code
+
+Create (if not existing) a ```.vscode``` directory. Then create ```mcp.json```
+
+```
+{
+    "servers": {
+        "DBX": {
+            "command": "python.exe",
+            "args": [
+               "/path/to/main.py"
+            ]
+        }
+    }
+}
 ```
 
 ## Available MCP Tools
