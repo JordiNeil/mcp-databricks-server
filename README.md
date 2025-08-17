@@ -1,4 +1,5 @@
 # Databricks MCP Server
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/JordiNeil/mcp-databricks-server)](https://archestra.ai/mcp-catalog/jordineil__mcp-databricks-server)
 
 A Model Context Protocol (MCP) server that connects to Databricks API, allowing LLMs to run SQL queries, list jobs, and get job status.
 
