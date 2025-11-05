@@ -209,5 +209,41 @@ def get_job_details(job_id: int) -> str:
     except Exception as e:
         return f"Error getting job details: {str(e)}"
 
+@mcp.tool()
+def preview_table(table_name: str, limit: int = 10) -> str:
+    """Preview rows from a Delta table"""
+    sql = f"SELECT * FROM {table_name} LIMIT {limit}"
+    return run_sql_query(sql)
+
+@mcp.tool()
+def search_workspace(path: str = "/") -> str:
+    """List objects in a Databricks workspace path"""
+    try:
+        response = databricks_api_request(f"workspace/list?path={path}")
+        objects = response.get("objects", [])
+        if not objects:
+            return f"No objects found at path: {path}"
+        table = "| Path | Type |\n| ---- | ---- |\n"
+        for obj in objects:
+            table += f"| {obj.get('path')} | {obj.get('object_type')} |\n"
+        return table
+    except Exception as e:
+        return f"Error listing workspace objects: {str(e)}"
+
+@mcp.tool()
+def list_pipelines() -> str:
+    """List Delta Live Tables pipelines"""
+    try:
+        response = databricks_api_request("pipelines")
+        pipelines = response.get("statuses", [])
+        if not pipelines:
+            return "No DLT pipelines found."
+        table = "| Pipeline ID | Name | State |\n| ------------ | ---- | ------ |\n"
+        for p in pipelines:
+            table += f"| {p.get('pipeline_id')} | {p.get('name')} | {p.get('state')} |\n"
+        return table
+    except Exception as e:
+        return f"Error listing DLT pipelines: {str(e)}"
+
 if __name__ == "__main__":
     mcp.run()

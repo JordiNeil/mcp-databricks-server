@@ -74,16 +74,51 @@ The following MCP tools are available:
 2. **list_jobs()** - List all Databricks jobs in your workspace
 3. **get_job_status(job_id: int)** - Get the status of a specific Databricks job by ID
 4. **get_job_details(job_id: int)** - Get detailed information about a specific Databricks job
+5. **preview_table(table_name: str, limit: int = 10)** - Preview rows from a Delta table
+6. **search_workspace(path: str = "/")** - List objects in a Databricks workspace path
+7. **list_pipelines()** - List Delta Live Tables pipelines
 
-## Example Usage with LLMs
+## Example Prompts for New Functions
 
-When used with LLMs that support the MCP protocol, this server enables natural language interaction with your Databricks environment:
+You can ask your LLM to use these tools in various ways. Here are some example prompts for each available function:
 
-- "Show me all tables in the database"
-- "Run a query to count records in the customer table"
-- "List all my Databricks jobs"
-- "Check the status of job #123"
-- "Show me details about job #456"
+### 1. `run_sql_query(sql: str)`
+- "Run the SQL: `SELECT count(*) FROM users`"
+- "What is the total revenue in the `sales` table?"
+- "Give me the earliest and latest order dates in the orders table."
+
+### 2. `list_jobs()`
+- "List all Databricks jobs in my workspace."
+- "What jobs are currently available to run?"
+
+### 3. `get_job_status(job_id: int)`
+- "Show me the run status for job 9876."
+- "Did job 123 finish successfully?"
+- "How many times has job 222 failed?"
+
+### 4. `get_job_details(job_id: int)`
+- "What tasks are included in job 1001?"
+- "Give me the details for job 345."
+
+### 5. `preview_table(table_name: str, limit: int = 10)`
+- "Preview the top 5 rows in the `customers` table."
+- "Show 10 records from table `events`."
+- "What data is in the `users_activity` table?"
+
+### 6. `search_workspace(path: str = "/")`
+- "List all folders in the workspace root."
+- "What notebooks are in `/Shared/Analytics`?"
+- "Show me all files in `/Users/janedoe`."
+
+### 7. `list_pipelines()`
+- "List all Delta Live Tables pipelines."
+- "Which DLT pipelines are available in my environment?"
+
+---
+
+Feel free to adapt these prompts to your needs or combine them for more complex workflows!
+
+
 
 ## Troubleshooting
 
