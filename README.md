@@ -9,6 +9,10 @@ A Model Context Protocol (MCP) server that connects to Databricks API, allowing 
 - Get status of specific Databricks jobs
 - Get detailed information about Databricks jobs
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/jordinei-mcp-databricks-server).
+
 ## Prerequisites
 
 - Python 3.7+
